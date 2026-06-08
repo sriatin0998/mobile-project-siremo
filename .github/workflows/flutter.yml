@@ -39,6 +39,18 @@ jobs:
           channel: 'stable'
           cache: true
 
+      #Tamabahan 
+
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       # ── 4. Verifikasi instalasi ───────────────────────────────────────
       - name: Flutter Doctor
         run: flutter doctor -v
@@ -54,11 +66,13 @@ jobs:
 
       # ── 10. Build APK release ─────────────────────────────────────────
       - name: Build APK Release
-        run: |
-          flutter build apk \
-            --release \
-            --split-per-abi
-
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 20
+          max_attempts: 3
+          command: |
+            flutter build apk --release --split-per-abi
+            
       # ── 11. Rename APK dengan versi ───────────────────────────────────
       - name: Rename APKs
         run: |
