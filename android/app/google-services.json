@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "662080486637",
+    "project_id": "siremo-project",
+    "storage_bucket": "siremo-project.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662080486637:android:be83a19ba90a2b654120e4",
+        "android_client_info": {
+          "package_name": "com.example.siremo_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcBeAw6vplvhrFaord6yfyiyVUCkPH1NU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
