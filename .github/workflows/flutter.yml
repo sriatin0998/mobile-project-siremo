@@ -65,9 +65,20 @@ jobs:
         continue-on-error: true
 
       # ── 10. Build APK release ─────────────────────────────────────────
-      - - name: Build APK Release
-          run: |
-            flutter build apk \ --release \ --split-per-abi
+      - name: Build APK Release
+        run: |
+          # 1. Buat folder untuk menampung gradle secara manual agar tidak download
+          mkdir -p ~/.gradle/wrapper/dists/gradle-8.12-all/
+          
+          # 2. Gunakan curl untuk download dari link alternatif yang lebih stabil
+          # (Contoh link mirror/cadangan)
+          curl -L -o gradle.zip https://downloads.gradle-dn.com/distributions/gradle-8.12-all.zip
+          
+          # 3. Pindahkan hasil download ke folder yang dicari Gradle
+          unzip -q gradle.zip -d ~/.gradle/wrapper/dists/gradle-8.12-all/
+          
+          # 4. Jalankan build
+          flutter build apk --release --split-per-abi
 
       # ── 11. Rename APK dengan versi ───────────────────────────────────
       - name: Rename APKs
