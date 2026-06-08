@@ -65,14 +65,10 @@ jobs:
         continue-on-error: true
 
       # ── 10. Build APK release ─────────────────────────────────────────
-      - name: Build APK Release
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 20
-          max_attempts: 3
-          command: |
-            flutter build apk --release --split-per-abi
-            
+      - - name: Build APK Release
+          run: |
+            flutter build apk \ --release \ --split-per-abi
+
       # ── 11. Rename APK dengan versi ───────────────────────────────────
       - name: Rename APKs
         run: |
