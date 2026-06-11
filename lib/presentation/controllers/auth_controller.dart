@@ -98,7 +98,7 @@ void loginWithEmail(String email, String password) async {
       await storage.write(key: 'auth_token', value: token);
       
       // 2. Navigasi ke Dashboard
-      Get.offAllNamed('/dashboard'); 
+      Get.offAllNamed(AppConstants.homeRoute);
     }
   } on DioException catch (e) {
     // Menangkap error dari Laravel (seperti 401 Unauthorized)
@@ -108,26 +108,39 @@ void loginWithEmail(String email, String password) async {
   }
 }
 
-  Future<void> registerWithEmail(String name, String email, String password, String phone) async {
+  Future<void> registerWithEmail(String name, String email, String password, String phone,String username) async {
   isLoading.value = true;
+  errorMessage.value = ""; // Reset error sebelum mulai
+
   try {
     final response = await dio.post(
-      '${ApiConstants.baseUrl}/register', // Sesuaikan IP
+      '${ApiConstants.baseUrl}/register',
       data: {
         'name': name,
         'email': email,
         'password': password,
+        'password_confirmation': password, // WAJIB DITAMBAHKAN
         'no_telepon': phone,
+        'username': username,
       },
+      options: Options(headers: {'Accept': 'application/json'}), // Tambahkan header ini
     );
 
     if (response.statusCode == 201) {
-      // Simpan token setelah daftar
+      // Simpan token
       await storage.write(key: 'auth_token', value: response.data['access_token']);
-      Get.offAllNamed('/home'); // Langsung masuk ke home
+      // Pastikan route sesuai dengan AppConstants (Gunakan konstanta, jangan hardcode)
+      Get.offAllNamed(AppConstants.homeRoute); 
     }
   } on DioException catch (e) {
-    errorMessage.value = e.response?.data['message'] ?? "Registrasi gagal";
+    // Menangkap detail error dari Laravel (Validation error)
+    if (e.response?.data != null && e.response?.data['errors'] != null) {
+      final errors = e.response?.data['errors'];
+      // Ambil pesan error pertama dari list errors
+      errorMessage.value = errors.values.first[0];
+    } else {
+      errorMessage.value = e.response?.data['message'] ?? "Registrasi gagal";
+    }
   } finally {
     isLoading.value = false;
   }

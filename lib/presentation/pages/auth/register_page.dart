@@ -12,13 +12,16 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final AuthController _authController = Get.find<AuthController>();
+  final AuthController _authController = Get.isRegistered<AuthController>()
+      ? Get.find<AuthController>()
+      : Get.put(AuthController());
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _usernameController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
@@ -27,6 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _phoneController.dispose();
@@ -62,6 +66,23 @@ class _RegisterPageState extends State<RegisterPage> {
               Text('Isi data diri Anda untuk mendaftar', style: AppTheme.body2),
               const SizedBox(height: 28),
 
+              // Username
+          TextFormField(
+            controller: _usernameController, // Pastikan Anda sudah mendeklarasikan _usernameController
+            decoration: const InputDecoration(
+              labelText: 'Username',
+              prefixIcon: Icon(Icons.alternate_email, color: AppTheme.primary),
+              hintText: 'Masukkan username unik',
+            ),
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Username tidak boleh kosong';
+              if (v.length < 4) return 'Username minimal 4 karakter';
+              if (v.contains(' ')) return 'Username tidak boleh mengandung spasi';
+              return null;
+            },
+          ),
+
+          const SizedBox(height: 16),
               // Name
               TextFormField(
                 controller: _nameController,
@@ -191,6 +212,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   _emailController.text.trim(),
                                   _passwordController.text,
                                   _phoneController.text.trim(),
+                                  _usernameController.text.trim(),
                                 );
                               }
                             },
