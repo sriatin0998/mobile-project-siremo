@@ -40,33 +40,43 @@ void onInit() {
         photoUrl: user.photoURL ?? '',
         createdAt: DateTime.now(),
       );
-    } else {
-      currentUser.value = null;
-    }
+    } 
   });
-
-  // 3. Gunakan everAll hanya untuk logika NAVIGASI (pindah halaman)
-  everAll([firebaseUser, isSplashFinished], (_) => _handleNavigation());
 }
 
 void finishSplash() {
     isSplashFinished.value = true;
+    _handleNavigation(); // Pastikan navigasi dipicu segera setelah splash selesai
   }
 
-void _handleNavigation() {
+// 1. Ubah _handleNavigation menjadi async
+Future<void> _handleNavigation() async {
   if (!isSplashFinished.value) return;
 
-  // Cek apakah user login via Firebase ATAU sudah ada token Laravel
-  bool isLoggedIn = firebaseUser.value != null || storage.read(key: 'auth_token') != null;
+  // Cek Firebase dulu
+  if (firebaseUser.value != null) {
+    Get.offAllNamed(AppConstants.homeRoute);
+    return;
+  }
 
-  if (isLoggedIn) {
-    if (Get.currentRoute != AppConstants.homeRoute) {
+  // Cek Token Laravel secara ASYNC
+  String? token = await storage.read(key: 'auth_token');
+  
+  if (token != null) {
+    // VERIFIKASI ke server agar tidak "los"
+    try {
+      // Panggil endpoint yang butuh autentikasi (misal: /profile)
+      await dio.get('${ApiConstants.baseUrl}/profile', 
+        options: Options(headers: {"Authorization": "Bearer $token"}));
+      
       Get.offAllNamed(AppConstants.homeRoute);
-    }
-  } else {
-    if (Get.currentRoute != AppConstants.loginRoute) {
+    } catch (e) {
+      // Token tidak valid (expired/server error)
+      await storage.delete(key: 'auth_token');
       Get.offAllNamed(AppConstants.loginRoute);
     }
+  } else {
+    Get.offAllNamed(AppConstants.loginRoute);
   }
 }
 
